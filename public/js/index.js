@@ -1,6 +1,7 @@
-import * as THREE from "/public/build/three.module.js";
-import { OrbitControls } from "/public/jsm/controls/OrbitControls.js";
-import { gsap } from "/public/build/gsap-core.js"
+import * as THREE from "/build/three.module.js"
+import { OrbitControls } from "/jsm/controls/OrbitControls.js"
+import { gsap } from "/build/gsap-core.js"
+import Stats from "/jsm/libs/stats.module.js"
 
 // Definir donde se pondra el lienzo
 const canvas = document.querySelector('.web-gl-container')
@@ -40,7 +41,7 @@ const camera = new THREE.PerspectiveCamera(
 )
 
 // Modificar posicion del eje z para la camara
-camera.position.z = 5;
+camera.position.z = 10;
 
 // Agregar la camara a la escena
 scene.add(camera);
@@ -79,8 +80,8 @@ window.addEventListener('resize', () => {
   render()
 })
 
-// Crear material con el color blanco
-const material = new THREE.MeshLambertMaterial({ color: 0xffffff })
+const stats = Stats()
+document.body.appendChild(stats.dom)
 
 // Crear Luz direccional para visualizar la malla
 const lightDirectional = new THREE.DirectionalLight(0xffffff, 1)
@@ -92,6 +93,20 @@ lightDirectional.position.set(5, 5, 5)
 // Definir luz de ambiente para el entorno de la escena
 const lightAmbient = new THREE.AmbientLight(0x9eaeff, 0.2)
 scene.add(lightAmbient)
+
+// Componente plano para el piso de la escena
+const planeGeometry = new THREE.PlaneGeometry(15,15,1,1);
+planeGeometry.rotateX(degreesToRadians(90))
+const materialPlane = new THREE.MeshLambertMaterial({
+  color: 0x19A4FA,
+  wireframe: false,
+  side: THREE.DoubleSide
+})
+const plane = new THREE.Mesh(planeGeometry, materialPlane);
+plane.castShadow = true
+plane.receiveShadow = true
+plane.position.y = -2.8
+scene.add(plane)
 
 
 // Clase figura para agrupar geometrias en un solo objeto para controlarlo
@@ -287,6 +302,9 @@ gsap.ticker.add(() => {
 
   // invocar la animacion de salto
   character.bounce()
+
+  // Invocar los cambios del stats
+  stats.update()
 
   // Renderizar la escena
   renderer.setSize(window.innerWidth, window.innerHeight)
